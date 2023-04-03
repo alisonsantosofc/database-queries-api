@@ -165,7 +165,7 @@ describe('Repositories', () => {
     const result1 = await gamesRepository.findByTitleContaining('of u');
     const result2 = await gamesRepository.findByTitleContaining('eed');
     const result3 = await gamesRepository.findByTitleContaining('rocket league');
-
+    
     expect(result1).toEqual([
       expect.objectContaining({
         title: 'The Last Of Us',
