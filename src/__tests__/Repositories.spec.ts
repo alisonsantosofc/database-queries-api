@@ -1,6 +1,6 @@
-import {
-  Connection, createConnection, getRepository, Repository,
-} from 'typeorm';
+import { Repository } from 'typeorm';
+
+import { postgresDataSource } from "../database";
 
 import { Game } from '../modules/games/entities/Game';
 import { User } from '../modules/users/entities/User';
@@ -47,8 +47,6 @@ const gamesSeed: Pick<Game, 'title'>[] = [
 ];
 
 describe('Repositories', () => {
-  let connection: Connection;
-
   let ormUsersRepository: Repository<User>;
   let ormGamesRepository: Repository<Game>;
 
@@ -56,20 +54,16 @@ describe('Repositories', () => {
   let gamesRepository: GamesRepository;
 
   beforeAll(async () => {
-    connection = await createConnection();
+    await postgresDataSource.initialize();
 
-    ormUsersRepository = getRepository(User);
-    ormGamesRepository = getRepository(Game);
+    ormUsersRepository = postgresDataSource.getRepository(User);
+    ormGamesRepository = postgresDataSource.getRepository(Game);
 
     usersRepository = new UsersRepository();
     gamesRepository = new GamesRepository();
 
-    await connection.query('DROP TABLE IF EXISTS users_games_games');
-    await connection.query('DROP TABLE IF EXISTS users');
-    await connection.query('DROP TABLE IF EXISTS games');
-    await connection.query('DROP TABLE IF EXISTS migrations');
-
-    await connection.runMigrations();
+    await postgresDataSource.dropDatabase();
+    await postgresDataSource.runMigrations();
 
     const [RL, TLOU, NFSMW, NFSP] = await ormGamesRepository.save(gamesSeed);
 
@@ -84,7 +78,7 @@ describe('Repositories', () => {
   });
 
   afterAll(async () => {
-    await connection.close();
+    await postgresDataSource.destroy();
   });
 
   it("[UsersRepository] should be able to find user with games list by user's ID", async () => {

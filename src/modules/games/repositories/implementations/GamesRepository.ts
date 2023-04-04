@@ -1,4 +1,5 @@
-import { getRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { postgresDataSource } from '../../../../database';
 
 import { User } from '../../../users/entities/User';
 import { Game } from '../../entities/Game';
@@ -9,7 +10,7 @@ export class GamesRepository implements IGamesRepository {
   private repository: Repository<Game>;
 
   constructor() {
-    this.repository = getRepository(Game);
+    this.repository = postgresDataSource.getRepository(Game);
   }
 
   async findByTitleContaining(param: string): Promise<Game[]> {
